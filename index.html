@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <!-- Add these in your existing head section -->
+
+  <title>Birthday Surprise</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: 'Courier New', monospace;
+      background: linear-gradient(45deg, #ff69b4, #87ceeb, #98fb98, #ffd700);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      overflow: hidden;
+    }
+
+    @keyframes gradientBG {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    /* Add this to your existing CSS */
+@media (max-width: 768px) {
+    .message {
+        font-size: 2.5rem;
+    }
+
+    .carousel-container {
+        max-width: 90%;
+    }
+
+    .card {
+        width: 140px;
+        height: 200px;
+    }
+
+    .nav-button.prev { left: -40px; }
+    .nav-button.next { right: -40px; }
+}
+
+@media (max-width: 480px) {
+    .message {
+        font-size: 2rem;
+    }
+
+    .card {
+        width: 120px;
+        height: 180px;
+    }
+
+    .nav-button {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+    }
+}
+
+#musicToggle {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 1000;
+  background-color: rgba(255, 255, 255, 0.7);
+  border-radius: 50%;
+  padding: 10px;
+  transition: transform 0.3s ease;
+}
+
+#musicToggle:hover {
+  transform: scale(1.1);
+}
+
+    .container {
+      text-align: center;
+      color: #fff;
+      padding: 2rem;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .message {
+      display: none;
+      font-size: 3.5rem;
+      margin: 1rem;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      animation: bounceIn 1.5s forwards;
+      cursor: pointer;
+      font-family: 'Arial', sans-serif;
+      font-weight: bold;
+      color: #ffffff;
+    }
+
+    @keyframes bounceIn {
+      0% { opacity: 0; transform: scale(0.3); }
+      50% { transform: scale(1.05); }
+      70% { transform: scale(0.9); }
+      100% { opacity: 1; transform: scale(1); }
+    }
+
+    .carousel-container {
+      display: none;
+      position: relative;
+      width: 100%;
+      max-width: 800px;
+      height: 220px;
+      margin: 4rem auto;
+      perspective: 1000px;
+    }
+
+    .carousel {
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      transition: transform 0.5s ease;
+    }
+
+    .card {
+      position: absolute;
+      width: 160px;
+      height: 220px;
+      background: linear-gradient(145deg, #ffffff, #f0f0f0);
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+      box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .card.focused {
+      transform: scale(1.2) translateZ(50px);
+      box-shadow: 0 0 30px rgba(255, 255, 255, 0.8);
+      z-index: 10;
+    }
+
+    .card-front img, .card-back img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 1rem;
+    }
+    
+    .card-back {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+    
+    .card-back img {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: -1;
+    }
+    
+    .card-back p {
+      color: white;
+      text-shadow: 1px 1px 2px rgba(0,0,0,0.7);
+      font-size: 1.2rem;
+      text-align: center;
+      padding: 10px;
+    }
+
+    .card.flipped .card-front {
+      transform: rotateY(180deg);
+    }
+
+    .card.flipped .card-back {
+      transform: rotateY(0);
+    }
+
+    .nav-button {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.3);
+      border: 2px solid white;
+      color: white;
+      font-size: 1.8rem;
+      cursor: pointer;
+      z-index: 20;
+      transition: all 0.3s ease;
+    }
+
+    .nav-button:hover {
+      background: rgba(255, 255, 255, 0.5);
+      transform: translateY(-50%) scale(1.1);
+    }
+
+    .nav-button.prev { left: -60px; }
+    .nav-button.next { right: -60px; }
+
+    .final-message {
+      display: none;
+      font-size: 3.5rem;
+      margin: 2rem 0;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+      animation: bounceIn 1s forwards;
+    }
+    .music-instruction {
+      position: fixed;
+      top: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.2em;
+      color: white;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+      font-weight: bold;
+      text-align: center;
+      z-index: 1000;
+      background-color: rgba(0, 0, 0, 0.5);
+      padding: 10px;
+      border-radius: 5px;
+    }
+    .start-button {
+      display: none;
+      margin-top: 2rem;
+      padding: 1.2rem 3.5rem;
+      font-size: 1.4rem;
+      border: none;
+      background: linear-gradient(45deg, #ffd700, #ff69b4);
+      color: white;
+      border-radius: 3rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .start-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 7px 20px rgba(0, 0, 0, 0.3);
+    }
+
+    .balloon {
+      position: fixed;
+      animation: floatUp 15s linear infinite;
+      opacity: 0.7;
+    }
+
+    @keyframes floatUp {
+      0% { transform: translateY(100vh) rotate(0deg); }
+      100% { transform: translateY(-100vh) rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <audio id="bgMusic" loop>
+    <source src="audio/your-song.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <!-- Replace the card front images -->
+<div class="card-front">
+  <img src="./images/card1.jpg" alt="card front" style="width: 100%; height: 100%; object-fit: cover; border-radius: 1rem;">
+</div>
+  <div class="container" id="container">
+    <div class="message" id="message-1">Happy</div>
+    <div class="message" id="message-2">Birthday</div>
+    <div class="message" id="message-3">Friend!</div>
+    
+    <div class="carousel-container" id="carousel-container">
+      <button class="nav-button prev" onclick="navigate(-1)">←</button>
+      <button class="nav-button next" onclick="navigate(1)">→</button>
+      <div class="carousel" id="carousel"></div>
+    </div>
+
+    <div class="final-message" id="final-message">
+      Happy Birthday!🎉✨ click on 🔇 
+    </div>
+    <div class="final-message" id="final-message">
+      Happy Birthday! 🎉✨
+      <p class="music-instruction">Click on the speaker icon 🔊 below to play music</p>
+    </div>
+    <button class="start-button" id="start-button" onclick="startAgain()">
+      Celebrate Again! 🎈
+    </button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/canvas-confetti/1.6.0/confetti.browser.min.js"></script>
+     <script>
+    let messageIndex = 1;
+    let currentIndex = 0;
+    const cardCount = 10;
+    const messages = [
+      "Sending joy! 🎈",
+      "Another year! 🎂",
+      "Keep shining! ⭐",
+      "Stay amazing! 🌟",
+      "Dream big! 🚀",
+      "Be happy! 🎉",
+      "Keep smiling! 😊",
+      "Reach high! 🌈",
+      "Stay blessed! 🙏",
+      "Pure magic! ✨"
+    ];
+
+    function createBalloons() {
+      const colors = ['#ff69b4', '#87ceeb', '#98fb98', '#ffd700'];
+      for (let i = 0; i < 10; i++) {
+        const balloon = document.createElement('div');
+        balloon.className = 'balloon';
+        balloon.innerHTML = '🎈';
+        balloon.style.left = `${Math.random() * 100}vw`;
+        balloon.style.fontSize = `${Math.random() * 20 + 20}px`;
+        balloon.style.animationDuration = `${Math.random() * 10 + 10}s`;
+        balloon.style.animationDelay = `${Math.random() * 5}s`;
+        document.body.appendChild(balloon);
+      }
+    }
+
+    function createCards() {
+      const carousel = document.getElementById('carousel');
+      for (let i = 0; i < cardCount; i++) {
+        const card = document.createElement('div');
+        card.className = 'card';
+        
+        const front = document.createElement('div');
+        front.className = 'card-front';
+        const frontImg = document.createElement('img');
+        frontImg.src = `./images/card-front-${i+1}.jpg`; // Make sure to name your images accordingly
+        frontImg.alt = `Card ${i+1} Front`;
+        front.appendChild(frontImg);
+        
+        const back = document.createElement('div');
+        back.className = 'card-back';
+        const backImg = document.createElement('img');
+        backImg.src = `./images/card-back-${i+1}.jpg`; // Make sure to name your images accordingly
+        backImg.alt = `Card ${i+1} Back`;
+        back.appendChild(backImg);
+        
+        const message = document.createElement('p');
+        message.textContent = messages[i % messages.length];
+        back.appendChild(message);
+        
+        card.appendChild(front);
+        card.appendChild(back);
+        carousel.appendChild(card);
+      }
+    }
+
+    function showMessages() {
+      if (messageIndex > 3) {
+        document.getElementById('carousel-container').style.display = 'block';
+        document.getElementById('final-message').style.display = 'block';
+        document.getElementById('start-button').style.display = 'block';
+        createCards();
+        startCarousel();
+        return;
+      }
+      const message = document.getElementById(`message-${messageIndex}`);
+      message.style.display = 'block';
+      setTimeout(() => {
+        message.style.display = 'none';
+        messageIndex++;
+        showMessages();
+      }, 2000);
+    }
+
+    function navigate(direction) {
+      const cards = document.querySelectorAll('.card');
+      cards.forEach((card, index) => {
+        card.classList.remove('focused');
+        card.classList.remove('flipped');
+        card.style.transform = `translateX(${(index - currentIndex) * 170}px)`;
+      });
+      
+      currentIndex += direction;
+      if (currentIndex < 0) {
+        currentIndex = cardCount - 1;
+      } else if (currentIndex >= cardCount) {
+        currentIndex = 0;
+      }
+      
+      cards[currentIndex].classList.add('focused');
+      cards[currentIndex].classList.add('flipped');
+      cards[currentIndex].style.transform = `translateX(0)`;
+    }
+
+    function startCarousel() {
+      const cards = document.querySelectorAll('.card');
+      currentIndex = 0;
+      cards[currentIndex].classList.add('focused');
+      cards[currentIndex].classList.add('flipped');
+      cards[currentIndex].style.transform = `translateX(0)`;
+      setInterval(() => {
+        navigate(1);
+      }, 3000);
+    }
+
+    function startAgain() {
+      messageIndex = 1;
+      document.getElementById('carousel-container').style.display = 'none';
+      document.getElementById('final-message').style.display = 'none';
+      document.getElementById('start-button').style.display = 'none';
+      showMessages();
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      createBalloons();
+      showMessages();
+    });
+  </script>
+
+  <!-- Music Player -->
+  <input type="file" id="musicUpload" accept="audio/*" style="display: none;">
+  <audio id="bgMusic" loop>
+    <source id="audioSource" type="audio/mp3">
+  </audio>
+  <button onclick="document.getElementById('musicUpload').click()" 
+          style="position: fixed; top: 20px; left: 20px; background: none; border: none; cursor: pointer; font-size: 24px;">
+    🎵
+  </button>
+
+  <!-- Emoji Links -->
+  <div style="position: fixed; top: 20px; right: 20px; z-index: 1000;">
+    <a href="https://youtu.be/kjk73SY_T-U" target="_blank" style="text-decoration: none; font-size: 24px; margin-right: 10px;">🎁</a>
+    <a href="https://prezi.com/view/6ERhEO6lykqYBMoKpxhz/" target="_blank" style="text-decoration: none; font-size: 24px;">👤</a>
+  </div>
+  <button id="musicToggle" style="background: none; border: none; font-size: 24px; cursor: pointer;">🔇</button>
+
+  <!-- Music Upload Handler -->
+  <script>
+    const audio = document.getElementById('bgMusic');
+const musicToggle = document.getElementById('musicToggle');
+
+let isPlaying = false;
+
+musicToggle.addEventListener('click', function() {
+  if (isPlaying) {
+    audio.pause();
+    musicToggle.textContent = '🔇';
+  } else {
+    audio.play();
+    musicToggle.textContent = '🔊';
+  }
+  isPlaying = !isPlaying;
+});
+
+// Optional: Start playing music when the page loads
+window.addEventListener('load', function() {
+  // Uncomment the next line if you want the music to start automatically
+  // audio.play();
+});
+    document.getElementById('musicUpload').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      const url = URL.createObjectURL(file);
+      const audio = document.getElementById('bgMusic');
+      document.getElementById('audioSource').src = url;
+      audio.load();
+      audio.play();
+    });
+    
+  </script>
+</body>
+</html>
